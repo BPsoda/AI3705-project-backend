@@ -4,10 +4,13 @@ import logging
 from asyncua import Server, ua
 from asyncua.common.methods import uamethod
 
+server = None
+idx = None
 
-async def start_server(recipe):
-    _logger = logging.getLogger(__name__)
+async def init_server():
+    global server, idx
     # setup our server
+    print("Initializing OPC server...")
     server = Server()
     await server.init()
     server.set_endpoint("opc.tcp://0.0.0.0:4840/freeopcua/server/")
@@ -16,28 +19,29 @@ async def start_server(recipe):
     uri = "drink.production.example"
     idx = await server.register_namespace(uri)
 
-    # populating our address space
-    # server.nodes, contains links to very common nodes like objects and root
-    objects = {}    # store all facility nodes, {node_id: node}
-    variables = {}  # store all variables, {node_id: {key: variable}}
-    for node in recipe['nodes']:
-        node_obj = await setup_node(server, idx, node)
-    # await server.nodes.objects.add_method(
-    #     ua.NodeId("ServerMethod", idx),
-    #     ua.QualifiedName("ServerMethod", idx),
-    #     func,
-    #     [ua.VariantType.Int64],
-    #     [ua.VariantType.Int64],
-    # )
+asyncio.run(init_server())  # it takes really long to init server, so we do it in advance
+
+
+async def start_server():
+    global server
+    _logger = logging.getLogger(__name__)
     _logger.info("Starting server!")
     async with server:
         while True:
             await asyncio.sleep(1)
 
+async def create_server(recipe):
+    global server, idx
+    # populating our address space
+    # server.nodes, contains links to very common nodes like objects and root
+    for node in recipe['nodes']:
+        node_obj = await setup_node(server, idx, node)
+    print("OPC server setup done!")
+    return server
 
 async def setup_node(server: Server, idx, node):
     node_type = node['dtype']
-    node_obj = server.nodes.objects.add_object(idx, node['id'])
+    node_obj = await server.nodes.objects.add_object(idx, node['id'])
     state = await node_obj.add_variable(idx, 'state', 'IDLE')
     await state.set_writable()
     process_stage = await node_obj.add_variable(idx, 'process_stage', '')
@@ -55,4 +59,21 @@ async def setup_node(server: Server, idx, node):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    asyncio.run(start_server(), debug=True)
+    recipe = {
+        "nodes": [
+            {
+                "dtype": "SourceTank",
+                "id": "source"
+            },
+            {
+                "dtype": "TankModel",
+                "id": "storage"
+            },
+            {
+                "dtype": "SinkTank",
+                "id": "sink"
+            }
+        ]
+    }
+    server = asyncio.run(create_server(recipe), debug=True)
+    asyncio.run(start_server(server), debug=True)

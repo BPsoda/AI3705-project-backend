@@ -16,21 +16,21 @@ async def start_client():
         print(f"Namespace Index for '{namespace}': {nsidx}")
         
         while True:
+            # print("Queue size: {}".format(msg_queue.qsize()))
+            if msg_queue.empty():
+                await asyncio.sleep(1)
+                continue
             msg = msg_queue.get()   # blocks when the queue is empty
             # Get the variable node for read / write
             var = await client.nodes.root.get_child(
-                ["0:Objects", f"{nsidx}:MyObject", f"{nsidx}:MyVariable"]
+                ["0:Objects", f"{nsidx}:{msg['node_id']}", f"{nsidx}:process_stage"]
             )
-            value = await var.read_value()
-            print(f"Value of MyVariable ({var}): {value}")
+            # value = await var.read_value()
+            # print(f"Value of MyVariable ({var}): {value}")
 
-            new_value = value - 50
-            print(f"Setting value of MyVariable to {new_value} ...")
-            await var.write_value(new_value)
-
-            # Calling a method
-            res = await client.nodes.objects.call_method(f"{nsidx}:ServerMethod", 5)
-            print(f"Calling ServerMethod returned {res}")
+            # new_value = value - 50
+            # print(f"Setting value of MyVariable to {new_value} ...")
+            await var.write_value(msg['product'])
 
 
 if __name__ == "__main__":

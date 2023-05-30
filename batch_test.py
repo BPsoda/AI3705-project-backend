@@ -5,48 +5,43 @@ if __name__ == '__main__':
     recipe_store = {
         "nodes": [
             {
-                "type": "SourceTank",
+                "dtype": "Start",
+                "id": "start"
+            },
+            {
+                "dtype": "SourceTank",
                 "id": "source"
             },
             {
-                "type": "TankModel",
+                "dtype": "TankModel",
                 "id": "storage"
             },
             {
-                "type": "SinkTank",
+                "dtype": "SinkTank",
                 "id": "sink"
             }
         ],
-        "connections": [
+        "edges": [
             {
-                "from": "source",
-                "to": "storage"
+                "source": "start",
+                "target": "source"
             },
             {
-                "from": "storage",
-                "to": "sink"
-            }
-        ],
-        "products": [
-            {
-                "prod_type": "type1",
-                "src_node_id": "source",
-                "number": 1
+                "source": "source",
+                "target": "storage"
             },
             {
-                "prod_type": "type2",
-                "src_node_id": "source",
-                "number": 2
-            },
-            {
-                "prod_type": "type3",
-                "src_node_id": "source",
-                "number": 3
+                "source": "storage",
+                "target": "sink"
             }
         ]
     }
+    product_cfg = {
+        "type": "碳酸基料",
+        "number": 10
+    }
     create_from_recipe(recipe_store)
-    run_batch()
+    run_batch(product_cfg)
     for i in range(20):
         print(get_batch_state())
         time.sleep(1)
