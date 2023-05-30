@@ -2,7 +2,7 @@ from batch_control import *
 import time
 
 if __name__ == '__main__':
-    recipe = {
+    recipe_store = {
         "nodes": [
             {
                 "type": "SourceTank",
@@ -45,8 +45,9 @@ if __name__ == '__main__':
             }
         ]
     }
-    create_from_recipe(recipe)
+    create_from_recipe(recipe_store)
     run_batch()
     for i in range(20):
         print(get_batch_state())
         time.sleep(1)
+    stop_batch()

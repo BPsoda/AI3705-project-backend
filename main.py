@@ -6,7 +6,10 @@ import batch_control
 def create_batch():
     global manager
     recipe = request.json
-    batch_control.create_from_recipe(recipe)
+    try:
+        batch_control.create_from_recipe(recipe)
+    except:
+        return "Error"
 
 @app.route('/nodes', methods=['GET'])
 def get_nodes():
@@ -31,5 +34,6 @@ def test():
 @app.route('/post_test',methods=['POST'])
 def post_test():
     return request.json
+
 if __name__ == '__main__':
     app.run(port=5015, debug=True)

@@ -47,8 +47,8 @@ class StateMachine:
         self.currentState = State.RUNNING
 
     def stop(self):
-        if self.currentState != State.RUNNING:
-            raise RuntimeError('Can not stop from state {}'.format(self.currentState))
+        # if self.currentState != State.RUNNING:
+        #     raise RuntimeError('Can not stop from state {}'.format(self.currentState))
         self.currentState = State.STOPPING
         self.transition.stop()
         self.currentState = State.STOPPED
