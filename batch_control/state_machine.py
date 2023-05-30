@@ -1,5 +1,6 @@
 '''State machine definition follows ISA 88 standard.'''
 from enum import IntEnum
+import time
 
 class State(IntEnum):
     '''State machine states.'''
@@ -60,7 +61,7 @@ class StateMachine:
         self.currentState = State.ABORTED
 
     def reset(self):
-        if self.currentState != State.ABORTED and self.currentState != State.COMPLETE:
+        if self.currentState != State.ABORTED and self.currentState != State.COMPLETE and self.currentState != State.STOPPED:
             raise RuntimeError('Can not reset from state {}'.format(self.currentState))
         self.transition.reset()
         self.currentState = State.IDLE
@@ -71,6 +72,13 @@ class StateMachine:
         self.currentState = State.HOLDING
         self.transition.hold()
         self.currentState = State.HELD
+
+    def restart(self):
+        if self.currentState != State.HELD:
+            raise RuntimeError('Can not restart from state {}'.format(self.currentState))
+        self.currentState = State.RESTARTING
+        self.transition.restart()
+        self.currentState = State.RUNNING
 
 
 class BaseTransition:
@@ -98,3 +106,87 @@ class BaseTransition:
 
     def hold(self):
         raise NotImplementedError
+    
+    def restart(self):
+        raise NotImplementedError
+    
+class ShortTransition(BaseTransition):
+    '''Short transition class. The transition puts sleep 1s in each method.'''
+    def __init__(self, node) -> None:
+        super().__init__(node)
+
+    def start(self):
+        time.sleep(1)
+
+    def pause(self):
+        time.sleep(1)
+    
+    def resume(self):
+        time.sleep(1)
+
+    def stop(self):
+        time.sleep(1)
+    
+    def abort(self):
+        time.sleep(1)
+
+    def reset(self):
+        time.sleep(1)
+
+    def hold(self):
+        time.sleep(1)
+
+    def restart(self):
+        time.sleep(1)
+
+
+class LongTransition(BaseTransition):
+    '''Long transition. The transition puts sleep 5s in each method.'''
+    def __init__(self, node) -> None:
+        super().__init__(node)
+
+    def start(self):
+        time.sleep(5)
+
+    def pause(self):
+        time.sleep(5)
+    
+    def resume(self):
+        time.sleep(5)
+
+    def stop(self):
+        time.sleep(5)
+
+    def abort(self):
+        time.sleep(5)
+
+    def reset(self):
+        time.sleep(5)
+
+    def hold(self):
+        time.sleep(5)
+
+    def restart(self):
+        time.sleep(5)
+
+
+class PassTrainsition(BaseTransition):
+    '''Pass transition. The transition does nothing.'''
+    def __init__(self, node) -> None:
+        super().__init__(node)
+    def start(self):
+        pass
+    def pause(self):
+        pass
+    def resume(self):
+        pass
+    def stop(self):
+        pass
+    def abort(self):
+        pass
+    def reset(self):
+        pass
+    def hold(self):
+        pass
+    def restart(self):
+        pass

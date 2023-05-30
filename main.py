@@ -20,9 +20,16 @@ def get_state():
 def actions():
     action = request.json
     if action['action'] == 'run':
-        batch_control.manager.run()
-    elif action['action'] == 'pause':
-        batch_control.manager.pause()
+        batch_control.run_batch()
+    elif action['action'] == 'stop':
+        batch_control.stop_batch()
 
+@app.route('/test')
+def test():
+    return "Hello World!"
+
+@app.route('/post_test',methods=['POST'])
+def post_test():
+    return request.json
 if __name__ == '__main__':
     app.run(port=5015, debug=True)

@@ -1,18 +1,19 @@
 from batch_control import *
+import time
 
 if __name__ == '__main__':
     recipe = {
         "nodes": [
             {
-                "type": "SourceNode",
+                "type": "SourceTank",
                 "id": "source"
             },
             {
-                "type": "StorageNode",
+                "type": "TankModel",
                 "id": "storage"
             },
             {
-                "type": "SinkNode",
+                "type": "SinkTank",
                 "id": "sink"
             }
         ],
@@ -45,5 +46,7 @@ if __name__ == '__main__':
         ]
     }
     create_from_recipe(recipe)
-    manager.run()
-    print(manager.get_state())
+    run_batch()
+    for i in range(20):
+        print(get_batch_state())
+        time.sleep(1)
